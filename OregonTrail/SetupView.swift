@@ -22,18 +22,18 @@ struct SetupView: View {
                     SkyView(weather: .warm)
                     WagonCanvas(phase: 0.9)
                 }
-                .frame(height: 150)
+                .frame(height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.25), lineWidth: 1))
 
                 VStack(spacing: 6) {
                     Text("THE OREGON TRAIL")
-                        .font(.system(size: 44, weight: .heavy))
+                        .font(.largeTitle.weight(.heavy))
                         .multilineTextAlignment(.center)
                     Text("Independence, Missouri · 1847")
-                        .font(.title3)
+                        .font(.body)
                     Text("2,040 miles of prairie, rivers, and mountains stand between you and a new life in Oregon. Get your whole party there alive.")
-                        .font(.title3)
+                        .font(.body)
                         .multilineTextAlignment(.center)
                         .padding(.top, 6)
                 }
@@ -41,7 +41,7 @@ struct SetupView: View {
                 Panel {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Choose your profession")
-                            .font(.title2.weight(.bold))
+                            .font(.headline)
                         ForEach(Profession.allCases, id: \.self) { p in
                             Button {
                                 profession = p
@@ -49,7 +49,7 @@ struct SetupView: View {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(p.title)
-                                            .font(.title3.weight(.bold))
+                                            .font(.headline)
                                         Text("Starts with \(moneyString(p.money)) · Final score ×\(p.multiplier)")
                                             .font(.body)
                                     }
@@ -60,7 +60,7 @@ struct SetupView: View {
                                 }
                                 .foregroundColor(profession == p ? OT.darkText : OT.cream)
                                 .padding(14)
-                                .frame(maxWidth: .infinity, minHeight: 60)
+                                .frame(maxWidth: .infinity, minHeight: 42)
                                 .background(profession == p ? OT.amber : OT.panelLight)
                                 .cornerRadius(10)
                             }
@@ -72,14 +72,14 @@ struct SetupView: View {
                 Panel {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Name your party of five")
-                            .font(.title2.weight(.bold))
+                            .font(.headline)
                         ForEach(0..<5, id: \.self) { i in
                             HStack {
                                 Text(i == 0 ? "Leader:" : "Member \(i + 1):")
-                                    .font(.title3.weight(.semibold))
+                                    .font(.body.weight(.semibold))
                                     .frame(width: 120, alignment: .leading)
                                 TextField(i == 0 ? "Wagon leader" : "Name", text: $names[i])
-                                    .font(.title3)
+                                    .font(.body)
                                     .foregroundColor(.black)
                                     .padding(10)
                                     .background(Color.white)
@@ -95,16 +95,16 @@ struct SetupView: View {
                 Panel {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("When do you leave Independence?")
-                            .font(.title2.weight(.bold))
+                            .font(.headline)
                         HStack(spacing: 8) {
                             ForEach(3...7, id: \.self) { m in
                                 Button {
                                     month = m
                                 } label: {
                                     Text(monthShort(m))
-                                        .font(.title3.weight(.bold))
+                                        .font(.headline)
                                         .foregroundColor(month == m ? OT.darkText : OT.cream)
-                                        .frame(maxWidth: .infinity, minHeight: 54)
+                                        .frame(maxWidth: .infinity, minHeight: 44)
                                         .background(month == m ? OT.amber : OT.panelLight)
                                         .cornerRadius(10)
                                 }
@@ -112,7 +112,7 @@ struct SetupView: View {
                             }
                         }
                         Text(monthHints[month] ?? "")
-                            .font(.title3)
+                            .font(.body)
                     }
                 }
 

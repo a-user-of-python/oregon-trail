@@ -47,10 +47,10 @@ struct HuntView: View {
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("Bullets: \(bulletsLeft)")
-                        .font(.title3.weight(.bold))
+                        .font(.headline)
                         .foregroundColor(OT.amber)
                     Text("Meat: \(meat) lbs")
-                        .font(.title3.weight(.bold))
+                        .font(.headline)
                         .foregroundColor(OT.amber)
                 }
             }
@@ -92,7 +92,7 @@ struct HuntView: View {
                                 .opacity(age < 0.16 ? 1 : 0)
                             if !e.label.isEmpty {
                                 Text(e.label)
-                                    .font(.title3.weight(.heavy))
+                                    .font(.body.weight(.heavy))
                                     .foregroundColor(e.hit ? OT.amber : Color(red: 1.0, green: 0.45, blue: 0.40))
                                     .shadow(color: .black, radius: 2, x: 1, y: 1)
                                     .offset(y: -38 - age * 30)
@@ -108,7 +108,7 @@ struct HuntView: View {
 
             if !lastHit.isEmpty {
                 Text(lastHit)
-                    .font(.title3.weight(.semibold))
+                    .font(.body.weight(.semibold))
                     .foregroundColor(OT.amber)
             }
 
@@ -137,10 +137,10 @@ struct HuntView: View {
 
     private func spawn(initial: Bool) {
         let kinds: [(String, String, Int, Double, CGFloat)] = [
-            ("🐇", "rabbit", 15, 0.55, 46),
-            ("🦌", "deer", 60, 0.38, 68),
-            ("🐻", "bear", 130, 0.26, 88),
-            ("🦬", "buffalo", 200, 0.20, 100),
+            ("🐇", "rabbit", 15, 0.55, 40),
+            ("🦌", "deer", 60, 0.38, 56),
+            ("🐻", "bear", 130, 0.26, 72),
+            ("🦬", "buffalo", 200, 0.20, 84),
         ]
         let count = initial ? 4 : 1
         for _ in 0..<count {

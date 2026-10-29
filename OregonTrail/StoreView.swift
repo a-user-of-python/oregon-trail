@@ -14,11 +14,11 @@ struct StoreView: View {
             VStack(spacing: 20) {
                 VStack(spacing: 6) {
                     Text(isInitialStore ? "Matt's General Store" : "Trading Post")
-                        .font(.largeTitle.weight(.bold))
+                        .font(.title.weight(.bold))
                         .multilineTextAlignment(.center)
                     if isInitialStore {
                         Text("\"Howdy! I'm Matt. You'll want a good outfit before you head west — spend careful, but don't skimp on oxen or food.\"")
-                            .font(.title3)
+                            .font(.body)
                             .multilineTextAlignment(.center)
                     }
                 }
@@ -26,10 +26,10 @@ struct StoreView: View {
                 Panel {
                     HStack {
                         Text("Your money:")
-                            .font(.title2.weight(.semibold))
+                            .font(.headline)
                         Spacer()
                         Text(moneyString(game.cash))
-                            .font(.title2.weight(.bold))
+                            .font(.headline)
                             .foregroundColor(OT.amber)
                     }
                 }
@@ -40,7 +40,7 @@ struct StoreView: View {
 
                 if !errorText.isEmpty {
                     Text(errorText)
-                        .font(.title3.weight(.semibold))
+                        .font(.body.weight(.semibold))
                         .foregroundColor(.red)
                         .multilineTextAlignment(.center)
                 }
@@ -48,7 +48,7 @@ struct StoreView: View {
                 if isInitialStore {
                     if game.oxen == 0 {
                         Text("⚠️ You have no oxen! Your wagon cannot move without them.")
-                            .font(.title3.weight(.bold))
+                            .font(.headline)
                             .foregroundColor(.orange)
                             .multilineTextAlignment(.center)
                     }
@@ -107,7 +107,7 @@ struct StoreView: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(item.title)
-                            .font(.title3.weight(.bold))
+                            .font(.headline)
                         Text("\(moneyString(unitPrice)) each")
                             .font(.body)
                     }
@@ -116,7 +116,7 @@ struct StoreView: View {
                         Text("You have")
                             .font(.body)
                         Text(ownedText(item))
-                            .font(.title3.weight(.bold))
+                            .font(.headline)
                             .foregroundColor(OT.amber)
                     }
                 }
@@ -151,7 +151,7 @@ struct StoreView: View {
                 Text(moneyString(price)).font(.body)
             }
             .foregroundColor(OT.darkText)
-            .frame(maxWidth: .infinity, minHeight: 54)
+            .frame(maxWidth: .infinity, minHeight: 44)
             .background(game.cash >= price ? OT.amber : Color.gray)
             .cornerRadius(10)
         }

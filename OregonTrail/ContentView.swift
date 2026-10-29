@@ -19,9 +19,9 @@ struct BigButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.title3.weight(.bold))
+                .font(.headline)
                 .foregroundColor(OT.darkText)
-                .frame(maxWidth: .infinity, minHeight: 58)
+                .frame(maxWidth: .infinity, minHeight: 46)
                 .background(color)
                 .cornerRadius(12)
         }
@@ -90,11 +90,11 @@ struct EventView: View {
             VStack(spacing: 24) {
                 if game.messageIsDeath {
                     Text("🪦")
-                        .font(.system(size: 72))
+                        .font(.system(size: 48))
                 }
                 Panel {
                     Text(game.message)
-                        .font(.title2.weight(.semibold))
+                        .font(.headline)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 BigButton(title: "Continue") {
@@ -115,20 +115,20 @@ struct EndView: View {
         ScrollView {
             VStack(spacing: 24) {
                 Text(game.phase == .won ? "🌄" : "🪦")
-                    .font(.system(size: 72))
+                    .font(.system(size: 48))
                 Text(game.endTitle)
-                    .font(.largeTitle.weight(.bold))
+                    .font(.title.weight(.bold))
                     .multilineTextAlignment(.center)
                 Panel {
                     VStack(alignment: .leading, spacing: 12) {
                         Text(game.endText)
-                            .font(.title3)
+                            .font(.body)
                             .fixedSize(horizontal: false, vertical: true)
                         if game.phase == .gameOver {
                             Text("You reached mile \(Int(game.milesTraveled)) of 2,040.")
-                                .font(.title3.weight(.semibold))
+                                .font(.body.weight(.semibold))
                             Text("Date: \(game.dateString)")
-                                .font(.title3)
+                                .font(.body)
                         }
                     }
                 }

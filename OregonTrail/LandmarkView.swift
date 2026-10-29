@@ -14,38 +14,38 @@ struct LandmarkView: View {
         ScrollView {
             VStack(spacing: 20) {
                 Text(lm.name)
-                    .font(.largeTitle.weight(.bold))
+                    .font(.title.weight(.bold))
                     .multilineTextAlignment(.center)
                 Text("Mile \(lm.miles) · \(game.dateString)")
-                    .font(.title3.weight(.semibold))
+                    .font(.body.weight(.semibold))
 
                 LandmarkArtView(landmark: lm)
-                    .frame(height: 170)
+                    .frame(height: 150)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.25), lineWidth: 1))
 
                 Panel {
                     Text(lm.blurb)
-                        .font(.title3)
+                        .font(.body)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Panel {
                     VStack(spacing: 10) {
                         HStack {
-                            Text("Health").font(.title3)
+                            Text("Health").font(.body)
                             Spacer()
-                            Text(game.healthStatus.title).font(.title3.weight(.bold)).foregroundColor(OT.amber)
+                            Text(game.healthStatus.title).font(.headline).foregroundColor(OT.amber)
                         }
                         HStack {
-                            Text("Food").font(.title3)
+                            Text("Food").font(.body)
                             Spacer()
-                            Text("\(game.food) lbs").font(.title3.weight(.bold)).foregroundColor(OT.amber)
+                            Text("\(game.food) lbs").font(.headline).foregroundColor(OT.amber)
                         }
                         HStack {
-                            Text("Party alive").font(.title3)
+                            Text("Party alive").font(.body)
                             Spacer()
-                            Text("\(game.aliveMembers.count) of \(game.members.count)").font(.title3.weight(.bold)).foregroundColor(OT.amber)
+                            Text("\(game.aliveMembers.count) of \(game.members.count)").font(.headline).foregroundColor(OT.amber)
                         }
                     }
                 }
@@ -86,9 +86,9 @@ struct LandmarkView: View {
             Panel {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("A traveler wants to trade")
-                        .font(.title3.weight(.bold))
+                        .font(.headline)
                     Text("They offer you \(offer.wantText) in exchange for \(offer.giveText).")
-                        .font(.title3)
+                        .font(.body)
                     if !tradeNote.isEmpty {
                         Text(tradeNote).font(.body.weight(.semibold)).foregroundColor(.orange)
                     }

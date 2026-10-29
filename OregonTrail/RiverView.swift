@@ -10,23 +10,23 @@ struct RiverView: View {
         ScrollView {
             VStack(spacing: 20) {
                 Text(lm.name)
-                    .font(.largeTitle.weight(.bold))
+                    .font(.title.weight(.bold))
                     .multilineTextAlignment(.center)
                 Text(game.dateString)
-                    .font(.title3.weight(.semibold))
+                    .font(.body.weight(.semibold))
 
                 AnimatedRiver()
-                    .frame(height: 180)
+                    .frame(height: 160)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.25), lineWidth: 1))
 
                 Panel {
                     VStack(alignment: .leading, spacing: 10) {
                         Text(lm.blurb)
-                            .font(.title3)
+                            .font(.body)
                             .fixedSize(horizontal: false, vertical: true)
                         Text("The river is about \(String(format: "%.1f", depth)) feet deep at the crossing.")
-                            .font(.title3.weight(.bold))
+                            .font(.headline)
                         // depth gauge
                         GeometryReader { g in
                             ZStack(alignment: .leading) {

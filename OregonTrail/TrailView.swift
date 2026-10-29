@@ -10,17 +10,17 @@ struct TrailView: View {
             VStack(spacing: 18) {
                 VStack(spacing: 4) {
                     Text(game.dateString)
-                        .font(.largeTitle.weight(.bold))
+                        .font(.title.weight(.bold))
                     Text("Next landmark: \(game.nextLandmark.name) — \(game.milesToNextLandmark) miles")
-                        .font(.title3.weight(.semibold))
+                        .font(.body.weight(.semibold))
                         .multilineTextAlignment(.center)
                     Text("Miles traveled: \(Int(game.milesTraveled)) of 2,040")
-                        .font(.title3)
+                        .font(.body)
                 }
 
                 ZStack(alignment: .bottomLeading) {
                     TrailScene(weather: game.weather, pace: game.pace)
-                        .frame(height: 180)
+                        .frame(height: 150)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     Text("Tap the scene to roll on →")
                         .font(.body.weight(.bold))
@@ -62,7 +62,7 @@ struct TrailView: View {
                     Panel {
                         VStack(spacing: 10) {
                             Text("Abandon this journey and start over?")
-                                .font(.title3.weight(.bold))
+                                .font(.headline)
                             HStack(spacing: 10) {
                                 BigButton(title: "Yes, Start Over", color: Color(red: 0.85, green: 0.45, blue: 0.38)) {
                                     game.backToSetup()
@@ -97,23 +97,23 @@ struct TrailView: View {
 
     private func statusRow(_ label: String, _ value: String) -> some View {
         HStack {
-            Text(label).font(.title3)
+            Text(label).font(.body)
             Spacer()
-            Text(value).font(.title3.weight(.bold)).foregroundColor(OT.amber)
+            Text(value).font(.headline).foregroundColor(OT.amber)
         }
     }
 
     private var partyPanel: some View {
         Panel {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Your party").font(.title3.weight(.bold))
+                Text("Your party").font(.headline)
                 ForEach(game.members) { m in
                     HStack(spacing: 10) {
                         Text(m.alive ? "●" : "†")
                             .foregroundColor(m.alive ? .green : .red)
-                            .font(.title3)
+                            .font(.body)
                         Text(m.name)
-                            .font(.title3.weight(.semibold))
+                            .font(.body.weight(.semibold))
                         Spacer()
                         if m.alive {
                             if let a = m.ailment {
@@ -144,13 +144,13 @@ struct TrailView: View {
     private var controlsPanel: some View {
         Panel {
             VStack(alignment: .leading, spacing: 14) {
-                Text("Pace").font(.title3.weight(.bold))
+                Text("Pace").font(.headline)
                 HStack(spacing: 8) {
                     ForEach(Pace.allCases, id: \.self) { p in
                         choiceButton(title: p.title, selected: game.pace == p) { game.pace = p; game.save() }
                     }
                 }
-                Text("Rations").font(.title3.weight(.bold))
+                Text("Rations").font(.headline)
                 HStack(spacing: 8) {
                     ForEach(Rations.allCases, id: \.self) { r in
                         choiceButton(title: r.title, selected: game.rations == r) { game.rations = r; game.save() }
@@ -167,7 +167,7 @@ struct TrailView: View {
             Text(title)
                 .font(.body.weight(.bold))
                 .foregroundColor(selected ? OT.darkText : OT.cream)
-                .frame(maxWidth: .infinity, minHeight: 50)
+                .frame(maxWidth: .infinity, minHeight: 42)
                 .background(selected ? OT.amber : OT.panelLight)
                 .cornerRadius(10)
         }
@@ -191,7 +191,7 @@ struct MapView: View {
                         .foregroundColor(OT.cream)
                     Spacer()
                     Button("Close") { dismiss() }
-                        .font(.title3.weight(.bold))
+                        .font(.headline)
                         .foregroundColor(OT.amber)
                 }
                 .padding(16)
@@ -203,7 +203,7 @@ struct MapView: View {
                         ForEach(Array(allLandmarks.enumerated()), id: \.offset) { _, lm in
                             HStack(spacing: 12) {
                                 Text(marker(for: lm))
-                                    .font(.title3)
+                                    .font(.body)
                                     .frame(width: 34)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(lm.name)
