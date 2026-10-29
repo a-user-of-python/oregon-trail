@@ -11,7 +11,7 @@ struct LandmarkArtView: View {
             // sky
             var sky = Path()
             sky.addRect(CGRect(x: 0, y: 0, width: w, height: h))
-            ctx.fill(sky, with: .gradient(Gradient(colors: [Color(red: 0.36, green: 0.58, blue: 0.84),
+            ctx.fill(sky, with: .linearGradient(Gradient(colors: [Color(red: 0.36, green: 0.58, blue: 0.84),
                                                             Color(red: 0.80, green: 0.89, blue: 0.96)]),
                                           startPoint: CGPoint(x: 0, y: 0),
                                           endPoint: CGPoint(x: 0, y: h)))
@@ -79,7 +79,7 @@ struct LandmarkArtView: View {
         // water
         var water = Path()
         water.addRect(CGRect(x: 0, y: h * 0.55, width: w, height: h * 0.45))
-        ctx.fill(water, with: .gradient(Gradient(colors: [Color(red: 0.25, green: 0.50, blue: 0.72),
+        ctx.fill(water, with: .linearGradient(Gradient(colors: [Color(red: 0.25, green: 0.50, blue: 0.72),
                                                           Color(red: 0.15, green: 0.36, blue: 0.58)]),
                                         startPoint: CGPoint(x: 0, y: h * 0.55),
                                         endPoint: CGPoint(x: 0, y: h)))
@@ -255,14 +255,14 @@ struct AnimatedRiver: View {
                 hills.closeSubpath()
                 var sky = Path()
                 sky.addRect(CGRect(x: 0, y: 0, width: w, height: h * 0.40))
-                ctx.fill(sky, with: .gradient(Gradient(colors: [Color(red: 0.36, green: 0.58, blue: 0.84),
+                ctx.fill(sky, with: .linearGradient(Gradient(colors: [Color(red: 0.36, green: 0.58, blue: 0.84),
                                                                 Color(red: 0.80, green: 0.89, blue: 0.96)]),
                                               startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: h * 0.4)))
                 ctx.fill(hills, with: .color(Color(red: 0.40, green: 0.53, blue: 0.36)))
                 // water
                 var water = Path()
                 water.addRect(CGRect(x: 0, y: h * 0.38, width: w, height: h * 0.62))
-                ctx.fill(water, with: .gradient(Gradient(colors: [Color(red: 0.28, green: 0.53, blue: 0.74),
+                ctx.fill(water, with: .linearGradient(Gradient(colors: [Color(red: 0.28, green: 0.53, blue: 0.74),
                                                                   Color(red: 0.13, green: 0.33, blue: 0.55)]),
                                                 startPoint: CGPoint(x: 0, y: h * 0.38), endPoint: CGPoint(x: 0, y: h)))
                 // three drifting wave layers
