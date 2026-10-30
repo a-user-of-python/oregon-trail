@@ -1,5 +1,8 @@
 import SwiftUI
 
+// MARK: - Landmark arrival: pixel art hero, journal blurb, trade journal card.
+// (Store sheet, trade flow, rest/leave calls identical to before.)
+
 struct LandmarkView: View {
     @ObservedObject var game: Game
     @State private var showStore = false
@@ -13,18 +16,21 @@ struct LandmarkView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                Text(lm.name)
-                    .font(.title.weight(.bold))
-                    .multilineTextAlignment(.center)
-                Text("Mile \(lm.miles) · \(game.dateString)")
-                    .font(.body.weight(.semibold))
+                VStack(spacing: 4) {
+                    Text(lm.name)
+                        .font(otDisplay(.largeTitle))
+                        .multilineTextAlignment(.center)
+                    Text("Mile \(lm.miles) · \(game.dateString)")
+                        .font(.body.weight(.semibold))
+                        .foregroundColor(OT.cream.opacity(0.85))
+                }
 
                 LandmarkArtView(landmark: lm)
-                    .frame(height: 150)
+                    .frame(height: 190)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.25), lineWidth: 1))
 
-                Panel {
+                ParchmentPanel {
                     Text(lm.blurb)
                         .font(.body)
                         .fixedSize(horizontal: false, vertical: true)
@@ -59,7 +65,7 @@ struct LandmarkView: View {
 
                 tradeCard
 
-                BigButton(title: "Rest 1 Day Here", color: Color(red: 0.65, green: 0.78, blue: 0.62)) {
+                BigButton(title: "Rest 1 Day Here", color: OT.sage) {
                     game.restDayAtStop()
                 }
                 BigButton(title: "Continue on the Trail") {
@@ -83,14 +89,15 @@ struct LandmarkView: View {
     @ViewBuilder
     private var tradeCard: some View {
         if let offer = offer, !tradeDone {
-            Panel {
+            ParchmentPanel {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("A traveler wants to trade")
-                        .font(.headline)
+                    SectionLabel(text: "A traveler wants to trade", color: OT.amberDark)
                     Text("They offer you \(offer.wantText) in exchange for \(offer.giveText).")
                         .font(.body)
                     if !tradeNote.isEmpty {
-                        Text(tradeNote).font(.body.weight(.semibold)).foregroundColor(.orange)
+                        Text(tradeNote)
+                            .font(.body.weight(.semibold))
+                            .foregroundColor(Color(red: 0.72, green: 0.36, blue: 0.05))
                     }
                     HStack(spacing: 10) {
                         BigButton(title: "Accept Trade") {
@@ -101,7 +108,7 @@ struct LandmarkView: View {
                                 tradeNote = "You don't have what they're asking for."
                             }
                         }
-                        BigButton(title: "No Thanks", color: Color(red: 0.65, green: 0.78, blue: 0.62)) {
+                        BigButton(title: "No Thanks", color: OT.sage) {
                             tradeDone = true
                         }
                     }

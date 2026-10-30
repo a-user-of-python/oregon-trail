@@ -1,5 +1,8 @@
 import SwiftUI
 
+// MARK: - General store: a ledger page — parchment rows, tabular prices.
+// (Buy logic, step sizes, and the no-oxen double-tap warning are unchanged.)
+
 struct StoreView: View {
     @ObservedObject var game: Game
     var factor: Double
@@ -14,7 +17,7 @@ struct StoreView: View {
             VStack(spacing: 20) {
                 VStack(spacing: 6) {
                     Text(isInitialStore ? "Matt's General Store" : "Trading Post")
-                        .font(.title.weight(.bold))
+                        .font(otDisplay(.largeTitle))
                         .multilineTextAlignment(.center)
                     if isInitialStore {
                         Text("\"Howdy! I'm Matt. You'll want a good outfit before you head west — spend careful, but don't skimp on oxen or food.\"")
@@ -29,19 +32,26 @@ struct StoreView: View {
                             .font(.headline)
                         Spacer()
                         Text(moneyString(game.cash))
-                            .font(.headline)
+                            .font(otDisplay(.title3))
                             .foregroundColor(OT.amber)
                     }
                 }
 
-                ForEach(StoreItem.allCases, id: \.self) { item in
-                    storeRow(item)
+                ParchmentPanel {
+                    VStack(spacing: 0) {
+                        ForEach(Array(StoreItem.allCases.enumerated()), id: \.element) { idx, item in
+                            storeRow(item)
+                            if idx < StoreItem.allCases.count - 1 {
+                                Divider().background(OT.parchmentEdge)
+                            }
+                        }
+                    }
                 }
 
                 if !errorText.isEmpty {
                     Text(errorText)
                         .font(.body.weight(.semibold))
-                        .foregroundColor(.red)
+                        .foregroundColor(Color(red: 1.0, green: 0.50, blue: 0.42))
                         .multilineTextAlignment(.center)
                 }
 
@@ -102,39 +112,41 @@ struct StoreView: View {
     private func storeRow(_ item: StoreItem) -> some View {
         let unitPrice = item.basePrice * factor
         let st = step(for: item)
-        return Panel {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(item.title)
-                            .font(.headline)
-                        Text("\(moneyString(unitPrice)) each")
-                            .font(.body)
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Text("You have")
-                            .font(.body)
-                        Text(ownedText(item))
-                            .font(.headline)
-                            .foregroundColor(OT.amber)
-                    }
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.title)
+                        .font(otDisplay(.headline, weight: .semibold))
+                    Text("\(moneyString(unitPrice)) each")
+                        .font(.body)
+                        .foregroundColor(OT.inkSoft)
                 }
-                if isInitialStore {
-                    Text("Matt: \"\(item.advice)\"")
-                        .font(.body.italic())
+                Spacer()
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("You have")
+                        .font(.body)
+                        .foregroundColor(OT.inkSoft)
+                    Text(ownedText(item))
+                        .font(.headline)
+                        .foregroundColor(OT.amberDark)
                 }
-                HStack(spacing: 10) {
-                    buyButton(item, qty: st, label: buyLabel(item, qty: st), price: unitPrice * Double(st))
-                    if item == .food {
-                        buyButton(item, qty: 250, label: "Buy 250 lbs", price: unitPrice * 250)
-                    }
-                    if item == .ammo {
-                        buyButton(item, qty: 5, label: "Buy 5 boxes", price: unitPrice * 5)
-                    }
+            }
+            if isInitialStore {
+                Text("Matt: \"\(item.advice)\"")
+                    .font(.body.italic())
+                    .foregroundColor(OT.inkSoft)
+            }
+            HStack(spacing: 10) {
+                buyButton(item, qty: st, label: buyLabel(item, qty: st), price: unitPrice * Double(st))
+                if item == .food {
+                    buyButton(item, qty: 250, label: "Buy 250 lbs", price: unitPrice * 250)
+                }
+                if item == .ammo {
+                    buyButton(item, qty: 5, label: "Buy 5 boxes", price: unitPrice * 5)
                 }
             }
         }
+        .padding(.vertical, 12)
     }
 
     private func buyButton(_ item: StoreItem, qty: Int, label: String, price: Double) -> some View {
@@ -152,7 +164,7 @@ struct StoreView: View {
             }
             .foregroundColor(OT.darkText)
             .frame(maxWidth: .infinity, minHeight: 44)
-            .background(game.cash >= price ? OT.amber : Color.gray)
+            .background(game.cash >= price ? OT.amber : Color.gray.opacity(0.55))
             .cornerRadius(10)
         }
         .buttonStyle(.plain)

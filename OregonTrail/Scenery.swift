@@ -1,264 +1,340 @@
 import SwiftUI
 
-// MARK: - Original drawn scenery (all artwork is code-drawn shapes — no assets)
+// MARK: - Pixel landscapes (original, code-drawn on the pixel grid)
+//
+// Layered composition in the reference style: banded sky with dithered
+// transitions, sun/moon, drifting blocky clouds, a stepped mountain range,
+// rolling hills, speckled ground with a dirt trail, the wagon team, and a
+// dark foreground grass fringe. Weather re-palettes the whole scene.
 
-// MARK: Sky
+// MARK: Sky palettes per weather (top, mid, horizon)
 
-func skyColors(for weather: Weather) -> [Color] {
+func skyBands(for weather: Weather) -> (Color, Color, Color) {
     switch weather {
-    case .warm: return [Color(red: 0.35, green: 0.58, blue: 0.85), Color(red: 0.78, green: 0.88, blue: 0.97)]
-    case .hot: return [Color(red: 0.45, green: 0.62, blue: 0.88), Color(red: 0.98, green: 0.85, blue: 0.60)]
-    case .cool: return [Color(red: 0.42, green: 0.60, blue: 0.82), Color(red: 0.82, green: 0.89, blue: 0.95)]
-    case .cold, .veryCold: return [Color(red: 0.55, green: 0.65, blue: 0.80), Color(red: 0.88, green: 0.92, blue: 0.97)]
-    case .rainy, .veryRainy: return [Color(red: 0.38, green: 0.45, blue: 0.55), Color(red: 0.66, green: 0.72, blue: 0.78)]
-    case .snowy, .verySnowy: return [Color(red: 0.70, green: 0.78, blue: 0.88), Color(red: 0.93, green: 0.95, blue: 0.99)]
-    case .foggy: return [Color(red: 0.62, green: 0.68, blue: 0.72), Color(red: 0.85, green: 0.88, blue: 0.89)]
+    case .warm:  return (Color(red: 0.16, green: 0.38, blue: 0.72),
+                         Color(red: 0.38, green: 0.60, blue: 0.86),
+                         Color(red: 0.74, green: 0.86, blue: 0.94))
+    case .hot:   return (Color(red: 0.20, green: 0.42, blue: 0.76),
+                         Color(red: 0.45, green: 0.66, blue: 0.88),
+                         Color(red: 0.96, green: 0.82, blue: 0.55))
+    case .cool:  return (Color(red: 0.24, green: 0.40, blue: 0.64),
+                         Color(red: 0.47, green: 0.62, blue: 0.78),
+                         Color(red: 0.78, green: 0.86, blue: 0.90))
+    case .cold, .veryCold:
+                 return (Color(red: 0.32, green: 0.44, blue: 0.60),
+                         Color(red: 0.56, green: 0.66, blue: 0.76),
+                         Color(red: 0.85, green: 0.90, blue: 0.94))
+    case .rainy, .veryRainy:
+                 return (Color(red: 0.24, green: 0.30, blue: 0.40),
+                         Color(red: 0.40, green: 0.48, blue: 0.56),
+                         Color(red: 0.62, green: 0.69, blue: 0.73))
+    case .snowy, .verySnowy:
+                 return (Color(red: 0.45, green: 0.56, blue: 0.70),
+                         Color(red: 0.65, green: 0.74, blue: 0.84),
+                         Color(red: 0.90, green: 0.93, blue: 0.96))
+    case .foggy: return (Color(red: 0.44, green: 0.50, blue: 0.52),
+                         Color(red: 0.60, green: 0.65, blue: 0.65),
+                         Color(red: 0.78, green: 0.81, blue: 0.79))
     }
 }
 
-struct HillShape: Shape {
-    var lift: CGFloat = 0.55   // ridge height (fraction of height)
-    var amp: CGFloat = 0.10    // rolling amount
-    var phase: CGFloat = 0
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        let base = rect.height * lift
-        let a = rect.height * amp
-        p.move(to: CGPoint(x: 0, y: rect.height))
-        p.addLine(to: CGPoint(x: 0, y: base + sin(phase) * a))
-        p.addQuadCurve(to: CGPoint(x: rect.width * 0.5, y: base - a),
-                       control: CGPoint(x: rect.width * 0.25, y: base + a * 1.7))
-        p.addQuadCurve(to: CGPoint(x: rect.width, y: base + a * 0.6),
-                       control: CGPoint(x: rect.width * 0.75, y: base - a * 1.9))
-        p.addLine(to: CGPoint(x: rect.width, y: rect.height))
-        p.closeSubpath()
-        return p
+private func groundPalette(for weather: Weather) -> (base: Color, dark: Color, lite: Color, hill: Color) {
+    switch weather {
+    case .snowy, .verySnowy:
+        return (Color(red: 0.87, green: 0.90, blue: 0.92), Color(red: 0.72, green: 0.79, blue: 0.83),
+                Color(red: 0.96, green: 0.97, blue: 0.98), Color(red: 0.62, green: 0.70, blue: 0.76))
+    case .rainy, .veryRainy:
+        return (Color(red: 0.24, green: 0.38, blue: 0.18), Color(red: 0.17, green: 0.29, blue: 0.13),
+                Color(red: 0.32, green: 0.48, blue: 0.23), Color(red: 0.28, green: 0.40, blue: 0.24))
+    case .hot:
+        return (Color(red: 0.55, green: 0.52, blue: 0.24), Color(red: 0.44, green: 0.42, blue: 0.18),
+                Color(red: 0.66, green: 0.62, blue: 0.30), Color(red: 0.48, green: 0.50, blue: 0.26))
+    default:
+        return (PX.grass, PX.grassDark, PX.grassLite, PX.hillFar)
     }
 }
 
-struct SkyView: View {
-    var weather: Weather
-    var body: some View {
-        ZStack {
-            LinearGradient(colors: skyColors(for: weather), startPoint: .top, endPoint: .bottom)
-            if weather == .warm || weather == .hot {
-                GeometryReader { geo in
-                    ZStack {
-                        Circle()
-                            .fill(Color(red: 0.99, green: 0.85, blue: 0.40))
-                            .frame(width: 54, height: 54)
-                            .position(x: geo.size.width * 0.82, y: geo.size.height * 0.24)
-                        Circle()
-                            .fill(Color(red: 0.99, green: 0.85, blue: 0.40).opacity(0.35))
-                            .frame(width: 84, height: 84)
-                            .position(x: geo.size.width * 0.82, y: geo.size.height * 0.24)
-                    }
-                }
-            }
-            if weather.isWet || weather == .foggy {
-                GeometryReader { geo in
-                    ForEach(0..<3, id: \.self) { i in
-                        Ellipse()
-                            .fill(Color.white.opacity(weather == .foggy ? 0.5 : 0.75))
-                            .frame(width: geo.size.width * 0.42, height: 26)
-                            .position(x: geo.size.width * (0.22 + 0.28 * Double(i)),
-                                      y: geo.size.height * (0.16 + 0.07 * Double(i % 2)))
-                    }
-                }
-            }
-            HillShape(lift: 0.62, amp: 0.10, phase: 1.3)
-                .fill(Color(red: 0.42, green: 0.55, blue: 0.38))
-            HillShape(lift: 0.78, amp: 0.08, phase: 4.1)
-                .fill(Color(red: 0.30, green: 0.46, blue: 0.28))
-        }
+// MARK: Scene renderer
+
+/// Draws the full landscape into `pix`. `t` is animation time in seconds
+/// (pass a constant for a still). Grid is `cols` x `rows` cells.
+func drawPixelLandscape(_ pix: inout Pix, cols: Int, rows: Int, weather: Weather,
+                        t: Double, wagon: Bool, pace: Pace,
+                        groundTopFrac: Double, seed: Int) {
+    let horizon = Int(Double(rows) * groundTopFrac)
+    let gp = groundPalette(for: weather)
+    let (skyTop, skyMid, skyHor) = skyBands(for: weather)
+    let snowy = weather.isSnow
+
+    // --- sky: three bands + checker dither at the seams
+    let b1 = horizon * 2 / 5
+    let b2 = horizon * 4 / 5
+    pix.r(0, 0, cols, b1, skyTop)
+    pix.r(0, b1, cols, b2 - b1, skyMid)
+    pix.r(0, b2, cols, horizon - b2, skyHor)
+    for x in 0..<cols where (x + b1) % 2 == 0 { pix.p(x, b1, skyTop) }
+    for x in 0..<cols where (x + b2) % 2 == 0 { pix.p(x, b2, skyMid) }
+
+    // --- sun (clear) or pale disc (cold/snow), none in rain/fog
+    if weather == .warm || weather == .hot {
+        drawDisc(&pix, cx: cols * 4 / 5, cy: max(4, horizon / 4), r: 4, c: PX.sun)
+        drawDisc(&pix, cx: cols * 4 / 5, cy: max(4, horizon / 4), r: 6, c: PX.sun.opacity(0.25))
+    } else if weather == .cold || weather == .veryCold || snowy {
+        drawDisc(&pix, cx: cols * 4 / 5, cy: max(4, horizon / 4), r: 3, c: PX.cloud.opacity(0.8))
     }
-}
 
-// MARK: Wagon + oxen (Canvas-drawn, phase-animated)
+    // --- clouds (blocky clusters, slow drift)
+    let drift = Int(t * 1.2)
+    let cloudC: Color = (weather.isWet || weather == .foggy) ? PX.cloudShad : PX.cloud
+    for i in 0..<3 {
+        let baseX = phash(i * 31 + seed, cols + 30) - 15
+        let cx = ((baseX + drift) % (cols + 24) + (cols + 24)) % (cols + 24) - 12
+        let cy = 2 + phash(i * 17 + seed, max(3, horizon / 3))
+        drawCloud(&pix, x: cx, y: cy, c: cloudC)
+    }
 
-struct WagonCanvas: View {
-    var phase: Double
-
-    var body: some View {
-        Canvas { ctx, size in
-            let w = size.width, h = size.height
-            let u = min(w / 340, h / 150)
-            let gy = h * 0.86  // ground line
-
-            // ground
-            var ground = Path()
-            ground.addRect(CGRect(x: 0, y: gy, width: w, height: h - gy))
-            ctx.fill(ground, with: .color(Color(red: 0.55, green: 0.44, blue: 0.26)))
-            // grass strokes
-            var grass = Path()
-            for i in 0..<26 {
-                let gx = CGFloat((i * 67) % Int(max(w, 1)))
-                grass.move(to: CGPoint(x: gx, y: gy + 4))
-                grass.addLine(to: CGPoint(x: gx + 3, y: gy - 5))
+    // --- mountain range (stepped silhouettes, snow caps on the tall peaks)
+    let peaks: [(Double, Double, Double)] = [(0.16, 0.30, 0.34), (0.50, 0.38, 0.44), (0.84, 0.30, 0.30)]
+    for x in 0..<cols {
+        var top = horizon
+        for (cf, hw, hf) in peaks {
+            let c = cf * Double(cols), w = hw * Double(cols)
+            let d = abs(Double(x) - c)
+            if d < w {
+                let hgt = hf * Double(rows) * (1 - d / w)
+                top = min(top, horizon - Int(hgt))
             }
-            ctx.stroke(grass, with: .color(Color(red: 0.36, green: 0.50, blue: 0.24)), lineWidth: 2)
-
-            drawOx(ctx, cx: w * 0.86, gy: gy, u: u, phase: phase + 0.7, tint: Color(red: 0.42, green: 0.36, blue: 0.30))
-            drawOx(ctx, cx: w * 0.70, gy: gy, u: u, phase: phase, tint: Color(red: 0.50, green: 0.43, blue: 0.36))
-
-            // harness line from wagon to oxen
-            var harness = Path()
-            harness.move(to: CGPoint(x: w * 0.585, y: gy - 34 * u))
-            harness.addLine(to: CGPoint(x: w * 0.655, y: gy - 38 * u))
-            ctx.stroke(harness, with: .color(Color(red: 0.25, green: 0.18, blue: 0.10)), lineWidth: 2.5 * u)
-
-            drawWagon(ctx, w: w, gy: gy, u: u, phase: phase)
+        }
+        if top < horizon {
+            pix.r(x, top, 1, horizon - top, PX.mtn)
+            if horizon - top > 9 { pix.r(x, top, 1, 2, PX.snow) }
+            if x % 3 == 0 { pix.r(x, top + 3, 1, horizon - top - 3, PX.mtnDark.opacity(0.35)) }
         }
     }
 
-    private func drawWagon(_ ctx: GraphicsContext, w: CGFloat, gy: CGFloat, u: CGFloat, phase: Double) {
-        var ctx = ctx
-        // canopy
-        var canopy = Path()
-        let left = w * 0.14, right = w * 0.60, baseY = gy - 34 * u, topY = gy - 88 * u
-        canopy.move(to: CGPoint(x: left, y: baseY))
-        canopy.addQuadCurve(to: CGPoint(x: right, y: baseY),
-                            control: CGPoint(x: (left + right) / 2, y: topY - 16 * u))
-        canopy.closeSubpath()
-        ctx.fill(canopy, with: .color(Color(red: 0.96, green: 0.93, blue: 0.84)))
-        ctx.stroke(canopy, with: .color(Color(red: 0.75, green: 0.70, blue: 0.58)), lineWidth: 2)
-        // canopy ribs
-        var ribs = Path()
-        for f in [0.25, 0.5, 0.75] {
-            let x = left + (right - left) * CGFloat(f)
-            ribs.move(to: CGPoint(x: x, y: baseY))
-            ribs.addQuadCurve(to: CGPoint(x: x, y: baseY - 6 * u),
-                              control: CGPoint(x: x, y: topY + 26 * u))
-        }
-        ctx.stroke(ribs, with: .color(Color(red: 0.80, green: 0.75, blue: 0.62)), lineWidth: 1.5)
-        // bed
-        var bed = Path()
-        bed.addRect(CGRect(x: w * 0.115, y: gy - 34 * u, width: w * 0.51, height: 13 * u))
-        ctx.fill(bed, with: .color(Color(red: 0.48, green: 0.32, blue: 0.17)))
-        var bedLine = Path()
-        bedLine.move(to: CGPoint(x: w * 0.115, y: gy - 27 * u))
-        bedLine.addLine(to: CGPoint(x: w * 0.625, y: gy - 27 * u))
-        ctx.stroke(bedLine, with: .color(Color(red: 0.36, green: 0.23, blue: 0.12)), lineWidth: 2)
-        // wheels (spokes rotate with phase)
-        drawWheel(ctx, cx: w * 0.20, cy: gy - 15 * u, r: 15 * u, phase: phase)
-        drawWheel(ctx, cx: w * 0.545, cy: gy - 15 * u, r: 15 * u, phase: phase)
+    // --- rolling far hills
+    for x in 0..<cols {
+        let lift = Int((sin(Double(x) * 0.045 + Double(seed)) * 0.5 + 0.5) * Double(max(3, rows / 14))) + 2
+        pix.r(x, horizon - lift, 1, lift + 2, gp.hill)
     }
 
-    private func drawWheel(_ ctx: GraphicsContext, cx: CGFloat, cy: CGFloat, r: CGFloat, phase: Double) {
-        var ctx = ctx
-        ctx.translateBy(x: cx, y: cy)
-        ctx.rotate(by: .radians(phase))
-        var tire = Path()
-        tire.addEllipse(in: CGRect(x: -r, y: -r, width: r * 2, height: r * 2))
-        ctx.stroke(tire, with: .color(Color(red: 0.30, green: 0.20, blue: 0.11)), lineWidth: r * 0.22)
-        var spokes = Path()
+    // --- ground
+    pix.r(0, horizon, cols, rows - horizon, gp.base)
+    // speckles
+    let gRows = max(1, rows - horizon)
+    for i in 0..<170 {
+        let sx = phash(i * 3 + seed * 7, cols)
+        let sy = horizon + phash(i * 11 + seed, gRows)
+        pix.p(sx, sy, i % 2 == 0 ? gp.dark : gp.lite)
+    }
+    // scattered grass tufts on the plain
+    if !snowy {
+        for i in 0..<10 {
+            let tx = phash(i * 41 + seed, cols - 8)
+            let ty = horizon + 2 + phash(i * 19 + seed, max(2, gRows - 6))
+            drawSprite(&pix, PXArt.grassTuft, x: tx, y: ty)
+        }
+    }
+
+    // --- dirt trail (a wavy-edged band the wagon rolls on)
+    let gy = rows - 9   // ground contact row for hooves/wheels
+    for x in 0..<cols {
+        let wobble = (x / 9) % 2
+        pix.r(x, gy - 2 + wobble, 1, 5, PX.dirt)
+        if phash(x * 5 + seed, 7) == 0 { pix.p(x, gy + 1, PX.dirtDark) }
+        if phash(x * 9 + seed, 11) == 0 { pix.p(x, gy - 1 + wobble, PX.dirtLight) }
+    }
+
+    // --- the wagon team
+    if wagon {
+        let speed: Double = pace == .steady ? 1.0 : (pace == .strenuous ? 1.7 : 2.5)
+        drawWagonTeam(&pix, rearX: max(4, (cols - 88) / 2), gy: gy, t: t, speed: speed)
+    }
+
+    // --- weather effects
+    if weather.isWet {
+        let n = weather == .veryRainy ? 80 : 48
+        for i in 0..<n {
+            let rx = (phash(i * 13 + seed, cols) + Int(t * 5)) % cols
+            let ry = (phash(i * 29 + seed, rows) + Int(t * 34)) % rows
+            pix.r(rx, ry, 1, 3, PX.foam.opacity(0.45))
+        }
+    } else if snowy {
+        let n = weather == .verySnowy ? 70 : 40
+        for i in 0..<n {
+            let sway = Int(sin(t * 1.2 + Double(i)) * 1.5)
+            let rx = ((phash(i * 17 + seed, cols) + sway) % cols + cols) % cols
+            let ry = (phash(i * 23 + seed, rows) + Int(t * (5.0 + Double(i % 3)))) % rows
+            pix.p(rx, ry, PX.snow.opacity(0.9))
+            if i % 4 == 0 { pix.p(rx + 1, ry, PX.snow.opacity(0.7)) }
+        }
+    } else if weather == .foggy {
         for k in 0..<3 {
-            let a = Double(k) * Double.pi / 3
-            spokes.move(to: CGPoint(x: -cos(a) * Double(r) * 0.85, y: -sin(a) * Double(r) * 0.85))
-            spokes.addLine(to: CGPoint(x: cos(a) * Double(r) * 0.85, y: sin(a) * Double(r) * 0.85))
+            let fy = horizon / 3 + k * (rows / 5)
+            pix.r(0, fy, cols, 3, PX.cloud.opacity(0.18))
         }
-        ctx.stroke(spokes, with: .color(Color(red: 0.42, green: 0.29, blue: 0.15)), lineWidth: r * 0.14)
-        var hub = Path()
-        hub.addEllipse(in: CGRect(x: -r * 0.22, y: -r * 0.22, width: r * 0.44, height: r * 0.44))
-        ctx.fill(hub, with: .color(Color(red: 0.30, green: 0.20, blue: 0.11)))
     }
 
-    private func drawOx(_ ctx: GraphicsContext, cx: CGFloat, gy: CGFloat, u: CGFloat, phase: Double, tint: Color) {
-        var ctx = ctx
-        let bodyY = gy - 44 * u
-        // legs (swing with phase)
-        var legs = Path()
-        let legXs: [CGFloat] = [-19, -9, 11, 21]
-        for (i, lx) in legXs.enumerated() {
-            let swing = sin(phase + Double(i % 2) * Double.pi) * 5 * u
-            legs.move(to: CGPoint(x: cx + lx * u, y: bodyY + 20 * u))
-            legs.addLine(to: CGPoint(x: cx + lx * u + CGFloat(swing), y: gy))
-        }
-        ctx.stroke(legs, with: .color(tint), lineWidth: 4.5 * u)
-        // body
-        var body = Path()
-        body.addRoundedRect(in: CGRect(x: cx - 27 * u, y: bodyY, width: 54 * u, height: 21 * u),
-                            cornerSize: CGSize(width: 8 * u, height: 8 * u))
-        ctx.fill(body, with: .color(tint))
-        // head (front, lowered)
-        var head = Path()
-        head.addRoundedRect(in: CGRect(x: cx + 22 * u, y: bodyY + 6 * u, width: 17 * u, height: 14 * u),
-                            cornerSize: CGSize(width: 5 * u, height: 5 * u))
-        ctx.fill(head, with: .color(tint))
-        // snout
-        var snout = Path()
-        snout.addRoundedRect(in: CGRect(x: cx + 33 * u, y: bodyY + 12 * u, width: 8 * u, height: 8 * u),
-                             cornerSize: CGSize(width: 3 * u, height: 3 * u))
-        ctx.fill(snout, with: .color(Color(red: 0.30, green: 0.24, blue: 0.20)))
-        // horns
-        var horns = Path()
-        horns.move(to: CGPoint(x: cx + 25 * u, y: bodyY + 6 * u))
-        horns.addQuadCurve(to: CGPoint(x: cx + 21 * u, y: bodyY - 3 * u),
-                           control: CGPoint(x: cx + 21 * u, y: bodyY + 2 * u))
-        horns.move(to: CGPoint(x: cx + 33 * u, y: bodyY + 6 * u))
-        horns.addQuadCurve(to: CGPoint(x: cx + 38 * u, y: bodyY - 3 * u),
-                           control: CGPoint(x: cx + 37 * u, y: bodyY + 2 * u))
-        ctx.stroke(horns, with: .color(Color(red: 0.92, green: 0.89, blue: 0.80)), lineWidth: 2.5 * u)
-        // tail
-        var tail = Path()
-        let sway = sin(phase * 1.3) * 3 * u
-        tail.move(to: CGPoint(x: cx - 27 * u, y: bodyY + 3 * u))
-        tail.addQuadCurve(to: CGPoint(x: cx - 31 * u + CGFloat(sway), y: bodyY + 22 * u),
-                          control: CGPoint(x: cx - 30 * u, y: bodyY + 12 * u))
-        ctx.stroke(tail, with: .color(tint), lineWidth: 3 * u)
+    // --- foreground fringe (dark grass silhouettes along the bottom edge)
+    let fg: Color = snowy ? Color(red: 0.55, green: 0.63, blue: 0.68) : Color(red: 0.15, green: 0.27, blue: 0.11)
+    for i in 0..<(cols / 2) {
+        let fx = i * 2 + phash(i + seed, 2)
+        let fh = 1 + phash(i * 7 + seed, 3)
+        pix.r(fx, rows - fh, 1, fh, fg)
     }
 }
 
-// MARK: Weather effects overlay (rain / snow)
+private func drawDisc(_ pix: inout Pix, cx: Int, cy: Int, r: Int, c: Color) {
+    for dy in -r...r {
+        let half = Int(Double(r) * cos(Double(dy) / Double(r) * .pi / 2))
+        pix.r(cx - half, cy + dy, half * 2 + 1, 1, c)
+    }
+}
 
-struct WeatherFX: View {
-    var weather: Weather
-    var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { tl in
-            Canvas { ctx, size in
-                let t = tl.date.timeIntervalSinceReferenceDate
-                let w = Double(size.width), h = Double(size.height)
-                if weather.isWet {
-                    let n = weather == .veryRainy ? 90 : 55
-                    var drops = Path()
-                    for i in 0..<n {
-                        let x = (Double((i * 97) % 401) / 401.0) * w + (t * 30).truncatingRemainder(dividingBy: 40) - 20
-                        let y = (Double((i * 57) % 389) / 389.0 + (t * 1.9).truncatingRemainder(dividingBy: 1.0) / 1.0).truncatingRemainder(dividingBy: 1.0) * (h + 30) - 15
-                        drops.move(to: CGPoint(x: x, y: y))
-                        drops.addLine(to: CGPoint(x: x - 3, y: y + 13))
-                    }
-                    ctx.stroke(drops, with: .color(Color.white.opacity(0.55)), lineWidth: 1.6)
-                } else if weather.isSnow {
-                    let n = weather == .verySnowy ? 80 : 45
-                    for i in 0..<n {
-                        let baseX = (Double((i * 89) % 397) / 397.0) * w
-                        let x = baseX + sin(t * 0.9 + Double(i)) * 12
-                        let y = ((Double((i * 71) % 383) / 383.0) + (t * 0.06 * (1.0 + Double(i % 3) * 0.3))).truncatingRemainder(dividingBy: 1.0) * h
-                        let r = 1.8 + Double(i % 3) * 0.8
-                        var flake = Path()
-                        flake.addEllipse(in: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2))
-                        ctx.fill(flake, with: .color(Color.white.opacity(0.85)))
-                    }
-                }
+private func drawCloud(_ pix: inout Pix, x: Int, y: Int, c: Color) {
+    pix.r(x + 2, y, 6, 1, c)
+    pix.r(x, y + 1, 11, 2, c)
+    pix.r(x + 1, y + 3, 8, 1, PX.cloudShad.opacity(0.55))
+}
+
+// MARK: Wagon + ox team (procedural pixel drawing, step-animated)
+
+func drawWagonTeam(_ pix: inout Pix, rearX: Int, gy: Int, t: Double, speed: Double) {
+    let step = Int(t * speed * 2.2)
+    let bob = (step % 2 == 0) ? 0 : 0   // wheels stay grounded; motion reads in spokes/legs
+
+    // dust puffs behind the rear wheel
+    for k in 0..<3 {
+        let age = (Int(t * 3 * speed) + k * 3) % 9
+        let dx = rearX - 2 - age
+        let dy = gy - 1 - age / 3
+        pix.r(dx, dy, 2, 1, PX.dust.opacity(0.55 - Double(age) * 0.05))
+    }
+
+    // ---- wagon
+    let bedY = gy - 6 + bob
+    // rear wheel (bigger) + front wheel
+    drawWheel(&pix, cx: rearX + 6, cy: gy - 3, r: 4, step: step)
+    drawWheel(&pix, cx: rearX + 32, cy: gy - 2, r: 3, step: step + 1)
+    // bed
+    pix.r(rearX, bedY, 38, 2, PX.wood)
+    pix.r(rearX, bedY, 38, 1, PX.woodLight)
+    pix.r(rearX + 1, bedY + 2, 36, 1, PX.woodDark)
+    // side boards hint
+    pix.p(rearX + 9, bedY + 1, PX.woodDark)
+    pix.p(rearX + 19, bedY + 1, PX.woodDark)
+    pix.p(rearX + 29, bedY + 1, PX.woodDark)
+    // canopy: stepped arch, 7 rows tall, cream with shaded right fall
+    let cx0 = rearX + 3, cw = 31
+    let arch: [(Int, Int)] = [(10, 11), (6, 19), (3, 25), (1, 29), (0, 31), (0, 31), (0, 31)]
+    for (i, (inset, wdt)) in arch.enumerated() {
+        let y = bedY - 7 + i
+        pix.r(cx0 + inset, y, wdt, 1, i < 2 ? PX.canvasTop : PX.canvasMid)
+        pix.r(cx0 + inset + wdt - 3, y, 3, 1, PX.canvasLow.opacity(0.8))
+    }
+    // canopy ribs
+    for fx in [0.28, 0.52, 0.76] {
+        let rx = cx0 + Int(Double(cw) * fx)
+        pix.r(rx, bedY - 4, 1, 4, PX.canvasLow)
+    }
+    // tongue from bed front down to the lead ox yoke
+    pix.r(rearX + 38, bedY + 1, 6, 1, PX.woodDark)
+    pix.r(rearX + 43, bedY + 2, 4, 1, PX.woodDark)
+
+    // ---- oxen (two, in line)
+    drawOx(&pix, x: rearX + 44, gy: gy, frame: step % 2, tint: PX.oxBody, dark: PX.oxDark)
+    drawOx(&pix, x: rearX + 63, gy: gy, frame: (step + 1) % 2, tint: Color(red: 0.50, green: 0.41, blue: 0.32), dark: Color(red: 0.38, green: 0.30, blue: 0.22))
+}
+
+private func drawWheel(_ pix: inout Pix, cx: Int, cy: Int, r: Int, step: Int) {
+    for dy in -r...r {
+        for dx in -r...r {
+            let d2 = dx * dx + dy * dy
+            if d2 <= r * r && d2 >= (r - 1) * (r - 1) {
+                pix.p(cx + dx, cy + dy, PX.woodDark)
             }
         }
-        .allowsHitTesting(false)
+    }
+    // spokes at 45° steps, rotating with `step`
+    let dirs: [(Int, Int)] = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
+    for k in 0..<4 {
+        let d = dirs[(step + k * 2) % 8]
+        for s in 1..<r {
+            pix.p(cx + d.0 * s, cy + d.1 * s, PX.wood)
+        }
+    }
+    pix.r(cx - 1, cy - 1, 2, 2, PX.ink)
+}
+
+private func drawOx(_ pix: inout Pix, x: Int, gy: Int, frame: Int, tint: Color, dark: Color) {
+    // legs (two-frame walk: pairs alternate a 1-cell stride)
+    let legXs = [2, 5, 12, 15]
+    for (i, lx) in legXs.enumerated() {
+        let stride = ((i < 2) == (frame == 0)) ? 1 : 0
+        pix.r(x + lx, gy - 3, 1, 3, dark)
+        pix.p(x + lx + stride, gy, dark)
+    }
+    // body
+    pix.r(x + 2, gy - 9, 13, 1, tint)
+    pix.r(x, gy - 8, 17, 3, tint)
+    pix.r(x + 1, gy - 5, 15, 1, dark)   // belly shade
+    // tail (sways with frame)
+    pix.r(x - 1, gy - 8, 1, 4, dark)
+    pix.p(x - 1 + frame, gy - 4, dark)
+    // head, lowered at the front
+    let hx = x + 17
+    pix.r(hx, gy - 7, 4, 3, tint)
+    pix.r(hx + 3, gy - 5, 2, 2, dark)   // muzzle
+    pix.p(hx + 1, gy - 6, PX.ink)      // eye
+    // horns + ears
+    pix.p(hx, gy - 8, PX.horn)
+    pix.p(hx - 1, gy - 9, PX.horn)
+    pix.p(hx + 3, gy - 8, PX.horn)
+    pix.p(hx + 4, gy - 9, PX.horn)
+    // yoke bar over the neck
+    pix.r(hx - 2, gy - 8, 5, 1, PX.woodDark)
+}
+
+// MARK: SwiftUI scene view
+
+struct PixelScene: View {
+    var weather: Weather
+    var animated: Bool = true
+    var wagon: Bool = true
+    var pace: Pace = .steady
+    var groundTopFrac: Double = 0.60
+    var seed: Int = 7
+
+    var body: some View {
+        if animated {
+            TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { tl in
+                canvas(t: tl.date.timeIntervalSinceReferenceDate)
+            }
+        } else {
+            canvas(t: 2.35)
+        }
+    }
+
+    private func canvas(t: Double) -> some View {
+        Canvas { ctx, size in
+            guard size.width > 4, size.height > 4 else { return }
+            let cols = size.width >= size.height ? 168 : 132
+            let cell = size.width / CGFloat(cols)
+            let rows = Int(size.height / cell) + 1
+            var pix = Pix(ctx: ctx, cell: cell)
+            drawPixelLandscape(&pix, cols: cols, rows: rows, weather: weather,
+                               t: t, wagon: wagon, pace: pace,
+                               groundTopFrac: groundTopFrac, seed: seed)
+        }
     }
 }
 
-// MARK: The living travel scene (sky + hills + wagon + weather)
-
+/// The living travel scene used on the trail screen.
 struct TrailScene: View {
     var weather: Weather
     var pace: Pace
     var body: some View {
-        ZStack {
-            SkyView(weather: weather)
-            TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { tl in
-                let speed: Double = pace == .steady ? 1.0 : (pace == .strenuous ? 1.7 : 2.5)
-                WagonCanvas(phase: tl.date.timeIntervalSinceReferenceDate * speed * 2.4)
-            }
-            WeatherFX(weather: weather)
-        }
+        PixelScene(weather: weather, animated: true, wagon: true, pace: pace,
+                   groundTopFrac: 0.58, seed: 7)
     }
 }

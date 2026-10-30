@@ -9,7 +9,7 @@ APP = "OregonTrail"
 FILES = [
     "OregonTrailApp.swift", "ContentView.swift", "SetupView.swift", "StoreView.swift",
     "TrailView.swift", "LandmarkView.swift", "RiverView.swift", "HuntView.swift",
-    "GameModel.swift", "Scenery.swift", "LandmarkArt.swift",
+    "GameModel.swift", "Scenery.swift", "LandmarkArt.swift", "PixelArt.swift",
 ]
 ASSETS = "Assets.xcassets"
 

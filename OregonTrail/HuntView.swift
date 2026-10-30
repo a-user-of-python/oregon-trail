@@ -1,8 +1,11 @@
 import SwiftUI
 
+// MARK: - Hunting: pixel prairie, code-drawn animal sprites, tap to shoot.
+// (Spawn/movement/scoring logic identical to before — only the art changed:
+// emoji animals, grass, and muzzle flash are now pixel sprites.)
+
 struct HuntAnimal: Identifiable {
     let id = UUID()
-    var emoji: String
     var name: String
     var meat: Int
     var x: Double          // 0...1 across the field
@@ -40,7 +43,7 @@ struct HuntView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Hunting")
-                        .font(.title.weight(.bold))
+                        .font(otDisplay(.title))
                     Text("Tap an animal to shoot it. Every tap costs a bullet.")
                         .font(.body)
                 }
@@ -59,14 +62,14 @@ struct HuntView: View {
 
             GeometryReader { geo in
                 ZStack {
-                    // layered prairie scene: sky, sun, hills
-                    SkyView(weather: .warm)
+                    // pixel prairie: banded sky, ranges, ground
+                    PixelScene(weather: .warm, animated: false, wagon: false,
+                               pace: .steady, groundTopFrac: 0.32, seed: 21)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
-                    // ground texture: simple original shapes
+                    // pixel grass tufts scattered over the field
                     ForEach(0..<14, id: \.self) { i in
-                        Text("🌾")
-                            .font(.system(size: 26))
-                            .opacity(0.55)
+                        GrassTuftArt()
+                            .opacity(0.8)
                             .position(x: CGFloat((i * 83) % 97) / 97 * geo.size.width,
                                       y: CGFloat((i * 47) % 40 + 58) / 100 * geo.size.height)
                     }
@@ -78,17 +81,16 @@ struct HuntView: View {
                                                  y: v.location.y / max(geo.size.height, 1)))
                         })
                     ForEach(animals) { a in
-                        Text(a.emoji)
-                            .font(.system(size: a.size))
+                        AnimalArt(name: a.name, height: a.size, flip: a.dir < 0)
+                            .contentShape(Rectangle())
                             .position(x: a.x * geo.size.width, y: a.y * geo.size.height)
                             .onTapGesture { shoot(a) }
                     }
-                    // shot effects: muzzle flash + floating result
+                    // shot effects: pixel starburst + floating result
                     ForEach(effects) { e in
                         let age = Date().timeIntervalSince(e.born)
                         ZStack {
-                            Text("💥")
-                                .font(.system(size: 42))
+                            BurstArt()
                                 .opacity(age < 0.16 ? 1 : 0)
                             if !e.label.isEmpty {
                                 Text(e.label)
@@ -136,23 +138,23 @@ struct HuntView: View {
     }
 
     private func spawn(initial: Bool) {
-        let kinds: [(String, String, Int, Double, CGFloat)] = [
-            ("🐇", "rabbit", 15, 0.55, 40),
-            ("🦌", "deer", 60, 0.38, 56),
-            ("🐻", "bear", 130, 0.26, 72),
-            ("🦬", "buffalo", 200, 0.20, 84),
+        let kinds: [(String, Int, Double, CGFloat)] = [
+            ("rabbit", 15, 0.55, 40),
+            ("deer", 60, 0.38, 56),
+            ("bear", 130, 0.26, 72),
+            ("buffalo", 200, 0.20, 84),
         ]
         let count = initial ? 4 : 1
         for _ in 0..<count {
             let k = kinds.randomElement()!
             let fromLeft = Bool.random()
             animals.append(HuntAnimal(
-                emoji: k.0, name: k.1, meat: k.2,
+                name: k.0, meat: k.1,
                 x: fromLeft ? -0.05 : 1.05,
                 y: Double.random(in: 0.15...0.85),
-                speed: k.3 * Double.random(in: 0.8...1.25),
+                speed: k.2 * Double.random(in: 0.8...1.25),
                 dir: fromLeft ? 1 : -1,
-                size: k.4
+                size: k.3
             ))
         }
     }
@@ -181,5 +183,41 @@ struct HuntView: View {
         guard !finished else { return }
         finished = true
         game.returnFromHunt(meat: meat, bulletsUsed: shots)
+    }
+}
+
+// MARK: - Pixel hunt art
+
+struct AnimalArt: View {
+    var name: String
+    var height: CGFloat
+    var flip: Bool
+    var body: some View {
+        let s = PXArt.animal(named: name)
+        Canvas { ctx, size in
+            var pix = Pix(ctx: ctx, cell: size.height / CGFloat(s.h))
+            drawSpriteD(&pix, s, x: 0, y: 0, flip: flip)
+        }
+        .frame(width: height * CGFloat(s.w) / CGFloat(s.h), height: height)
+    }
+}
+
+struct GrassTuftArt: View {
+    var body: some View {
+        Canvas { ctx, size in
+            var pix = Pix(ctx: ctx, cell: size.height / CGFloat(PXArt.grassTuft.h))
+            drawSprite(&pix, PXArt.grassTuft, x: 0, y: 0)
+        }
+        .frame(width: 30, height: 17)
+    }
+}
+
+struct BurstArt: View {
+    var body: some View {
+        Canvas { ctx, size in
+            var pix = Pix(ctx: ctx, cell: size.width / CGFloat(PXArt.burst.w))
+            drawSprite(&pix, PXArt.burst, x: 0, y: 0)
+        }
+        .frame(width: 46, height: 41)
     }
 }

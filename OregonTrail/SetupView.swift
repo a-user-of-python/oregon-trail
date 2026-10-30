@@ -1,5 +1,8 @@
 import SwiftUI
 
+// MARK: - Party setup: pixel hero title card + journal panels.
+// (All state, defaults, and game calls identical to before — presentation only.)
+
 struct SetupView: View {
     @ObservedObject var game: Game
 
@@ -18,30 +21,30 @@ struct SetupView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 22) {
-                ZStack {
-                    SkyView(weather: .warm)
-                    WagonCanvas(phase: 0.9)
+                ZStack(alignment: .bottomLeading) {
+                    PixelScene(weather: .warm, animated: true, wagon: true,
+                               pace: .steady, groundTopFrac: 0.55, seed: 5)
+                        .frame(height: 190)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("THE OREGON TRAIL")
+                            .font(otDisplay(.largeTitle))
+                        Text("Independence, Missouri · 1847")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundColor(OT.cream)
+                    .shadow(color: .black.opacity(0.65), radius: 3, x: 0, y: 1)
+                    .padding(16)
                 }
-                .frame(height: 120)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.25), lineWidth: 1))
 
-                VStack(spacing: 6) {
-                    Text("THE OREGON TRAIL")
-                        .font(.largeTitle.weight(.heavy))
-                        .multilineTextAlignment(.center)
-                    Text("Independence, Missouri · 1847")
-                        .font(.body)
-                    Text("2,040 miles of prairie, rivers, and mountains stand between you and a new life in Oregon. Get your whole party there alive.")
-                        .font(.body)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 6)
-                }
+                Text("2,040 miles of prairie, rivers, and mountains stand between you and a new life in Oregon. Get your whole party there alive.")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
 
-                Panel {
+                ParchmentPanel {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Choose your profession")
-                            .font(.headline)
+                        SectionLabel(text: "Choose your profession", color: OT.amberDark)
                         ForEach(Profession.allCases, id: \.self) { p in
                             Button {
                                 profession = p
@@ -49,30 +52,32 @@ struct SetupView: View {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(p.title)
-                                            .font(.headline)
+                                            .font(otDisplay(.headline, weight: .semibold))
                                         Text("Starts with \(moneyString(p.money)) · Final score ×\(p.multiplier)")
                                             .font(.body)
+                                            .foregroundColor(profession == p ? OT.darkText : OT.inkSoft)
                                     }
                                     Spacer()
                                     if profession == p {
                                         Text("✓").font(.title.weight(.bold))
                                     }
                                 }
-                                .foregroundColor(profession == p ? OT.darkText : OT.cream)
+                                .foregroundColor(profession == p ? OT.darkText : OT.ink)
                                 .padding(14)
                                 .frame(maxWidth: .infinity, minHeight: 42)
-                                .background(profession == p ? OT.amber : OT.panelLight)
+                                .background(profession == p ? OT.amber : Color.white.opacity(0.35))
                                 .cornerRadius(10)
+                                .overlay(RoundedRectangle(cornerRadius: 10)
+                                    .stroke(profession == p ? OT.amberDark : OT.parchmentEdge, lineWidth: 1))
                             }
                             .buttonStyle(.plain)
                         }
                     }
                 }
 
-                Panel {
+                ParchmentPanel {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Name your party of five")
-                            .font(.headline)
+                        SectionLabel(text: "Name your party of five", color: OT.amberDark)
                         ForEach(0..<5, id: \.self) { i in
                             HStack {
                                 Text(i == 0 ? "Leader:" : "Member \(i + 1):")
@@ -89,13 +94,13 @@ struct SetupView: View {
                         }
                         Text("Leave a name blank and we'll pick one.")
                             .font(.body)
+                            .foregroundColor(OT.inkSoft)
                     }
                 }
 
-                Panel {
+                ParchmentPanel {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("When do you leave Independence?")
-                            .font(.headline)
+                        SectionLabel(text: "When do you leave Independence?", color: OT.amberDark)
                         HStack(spacing: 8) {
                             ForEach(3...7, id: \.self) { m in
                                 Button {
@@ -103,10 +108,12 @@ struct SetupView: View {
                                 } label: {
                                     Text(monthShort(m))
                                         .font(.headline)
-                                        .foregroundColor(month == m ? OT.darkText : OT.cream)
+                                        .foregroundColor(month == m ? OT.darkText : OT.ink)
                                         .frame(maxWidth: .infinity, minHeight: 44)
-                                        .background(month == m ? OT.amber : OT.panelLight)
+                                        .background(month == m ? OT.amber : Color.white.opacity(0.35))
                                         .cornerRadius(10)
+                                        .overlay(RoundedRectangle(cornerRadius: 10)
+                                            .stroke(month == m ? OT.amberDark : OT.parchmentEdge, lineWidth: 1))
                                 }
                                 .buttonStyle(.plain)
                             }

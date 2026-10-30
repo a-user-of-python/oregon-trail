@@ -16,6 +16,7 @@
 		AB7B5CDEA6F7D2C226FC388E = {isa = PBXBuildFile; fileRef = 2285BD7AADF1F761410FD1E8; };
 		9A808552D1B360DE9447A7BF = {isa = PBXBuildFile; fileRef = BDC4D54CF1D112173DDED207; };
 		7360B9CC1493199397343EC9 = {isa = PBXBuildFile; fileRef = 49E6FDF17901665781F04FE1; };
+		886B5DB71A6D6A394560F50E = {isa = PBXBuildFile; fileRef = 0C0BE850A1F6818E4F767863; };
 		D0687455C07D878E9DB04308 = {isa = PBXBuildFile; fileRef = 671E5B54412D9F8033A8454C; };
 		9A09BCAD45B75F5E7299895D = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OregonTrailApp.swift; sourceTree = "<group>"; };
 		0A8C13525269D9F9FAC9D986 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -28,6 +29,7 @@
 		2285BD7AADF1F761410FD1E8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
 		BDC4D54CF1D112173DDED207 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scenery.swift; sourceTree = "<group>"; };
 		49E6FDF17901665781F04FE1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandmarkArt.swift; sourceTree = "<group>"; };
+		0C0BE850A1F6818E4F767863 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelArt.swift; sourceTree = "<group>"; };
 		671E5B54412D9F8033A8454C = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		99006388588CE7D539A04F10 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OregonTrail.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB5944C6515D6D2B678426AB = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 				2285BD7AADF1F761410FD1E8,
 				BDC4D54CF1D112173DDED207,
 				49E6FDF17901665781F04FE1,
+				0C0BE850A1F6818E4F767863,
 				BB5944C6515D6D2B678426AB,
 				671E5B54412D9F8033A8454C,
 			);
@@ -117,6 +120,7 @@
 				AB7B5CDEA6F7D2C226FC388E,
 				9A808552D1B360DE9447A7BF,
 				7360B9CC1493199397343EC9,
+				886B5DB71A6D6A394560F50E,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
